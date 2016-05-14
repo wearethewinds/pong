@@ -7,14 +7,6 @@
 </head>
 <body>
 <div id="gameboard"></div>
-<script src="node_modules/requirejs/require.js"></script>
-<script type="text/javascript">
-    require(["requirejs.conf"], function () {
-        requirejs.config({
-            paths: {'js/index': 'dist/game'}
-        });
-        require(['js/index']);
-    });
-</script>
+<script src="dist/bundle.js"></script>
 </body>
 </html>

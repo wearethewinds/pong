@@ -1,8 +1,4 @@
-define([], function () {
-
-    return {
-        up: [87],
-        down: [83]
-    }
-
-});
+export default {
+    up: [87],
+    down: [83]
+}

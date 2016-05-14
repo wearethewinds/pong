@@ -1,11 +1,9 @@
-define(['powerups/ReduceBarHeight', 'powerups/AddBall'], function (ReduceBarHeight, AddBall) {
+import PowerUps from './powerups';
 
-    return {
-        spawn: function (gameboard) {
-            var powerup = new AddBall(gameboard);
-            powerup.spawn();
-            return powerup;
-        }
-    };
-
-});
+export default {
+    spawn: function (gameboard) {
+        var powerup = new PowerUps.AddBall(gameboard);
+        powerup.spawn();
+        return powerup;
+    }
+};

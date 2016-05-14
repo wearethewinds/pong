@@ -1,9 +1,7 @@
-require(['Pong'], function (Pong) {
+import Pong from './pong';
 
-    init();
+init();
 
-    function init() {
-        Pong.start();
-    }
-
-});
+function init() {
+    Pong.start();
+}
