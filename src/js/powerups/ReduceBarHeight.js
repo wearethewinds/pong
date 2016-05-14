@@ -1,8 +1,8 @@
 import AbstractPowerUp from './AbstractPowerUp';
 
-const color = 'rgba(77,144,144, .7)';
+const color = 'rgba(144,77,77, .7)';
 
-class AddBallPowerUp extends AbstractPowerUp {
+class ReduceBarHeight extends AbstractPowerUp {
 
     constructor(gameboard) {
         super(gameboard);
@@ -18,4 +18,4 @@ class AddBallPowerUp extends AbstractPowerUp {
 
 }
 
-module.exports = AddBallPowerUp;
+module.exports = ReduceBarHeight;

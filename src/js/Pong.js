@@ -2,7 +2,7 @@ import Ball from './Ball';
 import Keyprofiles from './keyprofiles';
 import Player from './Player';
 import Result from './Result';
-import PowerUpHandler from './PowerUpHandler';
+import PowerUpManager from './PowerUpManager';
 import createjs from 'createjs-collection';
 
 const height = 180;
@@ -129,7 +129,7 @@ var spawnPowerUp = function () {
     }
     var rand = Math.floor(Math.random() * 1000);
     if (rand === 666) {
-        var powerup = PowerUpHandler.spawn(this);
+        var powerup = PowerUpManager.spawn(this);
         powerups.push(powerup);
     }
 
