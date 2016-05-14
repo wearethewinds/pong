@@ -131,7 +131,7 @@ const digits = {
     9: nine
 };
 
-export default {
+module.exports = {
     get: function (digit) {
         return digits[digit] || null;
     }

@@ -23229,106 +23229,120 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _createjsCollection = require('createjs-collection');
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _createjsCollection2 = _interopRequireDefault(_createjsCollection);
+var _GraphicService = require('./services/GraphicService');
+
+var _GraphicService2 = _interopRequireDefault(_GraphicService);
+
+var _UuidService = require('./services/UuidService');
+
+var _UuidService2 = _interopRequireDefault(_UuidService);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var width = 5;
 var maxangle = 150;
 var minangle = 30;
 var maxoffset = 25;
+var color = "#00FF00";
 
-var Ball = function Ball(gameboard, velocity, hozdirection, vertdirection, angle, x, y) {
-    this.id = createUuid();
-    this.gameboard = gameboard;
-    ;
-    this.x = x || gameboard.getWidth() / 2 - width / 2;
-    this.y = y || gameboard.getHeight() / 2 - width / 2;
-    this.oldX = null;
-    this.oldY = null;
-    this.easel = createBall(this.gameboard, this.x, this.y);
-    this.velocity = velocity || 2.5;
-    this.collisionOffset = 0;
-    // false => left , true => right
-    this.hozdirection = hozdirection || Math.random() < .5;
-    // false => top, true => bottom
-    this.vertdirection = vertdirection || Math.random() < .5;
-    this.angle = angle || Math.floor(Math.random() * (maxangle - minangle)) + minangle;
-    this.running = true;
-    this.anim = null;
-    this.gameboard.registerToLoop(this.render.bind(this));
-};
+var Ball = function () {
+    function Ball(gameboard, velocity, hozdirection, vertdirection, angle, x, y) {
+        _classCallCheck(this, Ball);
 
-Ball.prototype.addToStage = function (stage) {
-    stage.addChild(this.easel);
-    stage.update();
-};
-
-Ball.prototype.destroy = function () {
-    if (this.anim) {
-        clearInterval(this.anim);
+        this.gameboard = gameboard;
+        this.id = _UuidService2.default.getUuid;
+        this.x = x || this.gameboard.getWidth() / 2 - width / 2;
+        this.y = y || this.gameboard.getHeight() / 2 - width / 2;
+        this.oldX = null;
+        this.oldY = null;
+        this.easel = _GraphicService2.default.Circle(this.gameboard.getCanvasWidth() * (x / this.gameboard.getWidth()), this.gameboard.getCanvasHeight() * (y / this.gameboard.getHeight()), this.gameboard.getCanvasWidth() * (width / this.gameboard.getWidth()), color);
+        this.velocity = velocity || 2.5;
+        this.collisionOffset = 0;
+        // false => left , true => right
+        this.hozdirection = hozdirection || Math.random() < .5;
+        // false => top, true => bottom
+        this.vertdirection = vertdirection || Math.random() < .5;
+        this.angle = angle || Math.floor(Math.random() * (maxangle - minangle)) + minangle;
+        this.running = true;
+        this.gameboard.registerToLoop(this.render.bind(this));
     }
-};
 
-Ball.prototype.render = function () {
-    if (!this.running) {
-        return;
-    }
-    var val = Math.PI / 180 * (this.angle - 90);
-    this.oldX = this.x;
-    this.oldY = this.y;
-    this.x = this.hozdirection ? this.oldX - this.velocity * Math.cos(val) : this.oldX + this.velocity * Math.cos(val);
-    this.y = this.vertdirection ? this.oldY - this.velocity * Math.sin(val) : this.oldY + this.velocity * Math.sin(val);
-    this.move();
-};
-
-Ball.prototype.hit = function (bar, offset) {
-    this.collisionOffset = 0;
-    var diffFromTop = Math.max(0, offset);
-    var recalcToGameDimension = this.gameboard.getHeight() / this.gameboard.getCanvasHeight() * diffFromTop;
-    var angleOffset = Math.abs(recalcToGameDimension - bar.getHeight() / 2) / (bar.getHeight() / 2) * maxoffset;
-    if (this.anim) {
-        clearInterval(this.anim);
-    }
-    if (!this.vertdirection && offset <= 15 || this.vertdirection && offset > 15) {
-        this.angle = Math.max(minangle, this.angle - angleOffset);
-    } else {
-        this.angle = Math.min(maxangle, this.angle + angleOffset);
-    }
-    this.hozdirection = !this.hozdirection;
-    this.velocity *= 1.05;
-    //this.start();
-};
-
-Ball.prototype.move = function () {
-    ++this.collisionOffset;
-    var bars = this.gameboard.getBars();
-    this.easel.x = this.gameboard.getCanvasWidth() * (this.x / this.gameboard.getWidth());
-    this.easel.y = this.gameboard.getCanvasHeight() * (this.y / this.gameboard.getHeight());
-    if (this.y - width <= 0 || this.y + width >= this.gameboard.getHeight()) {
-        this.vertdirection = !this.vertdirection;
-    }
-    var player = null;
-    if (this.x + width <= 0 && this.collisionOffset > 50) {
-        this.running = false;
-        player = this.gameboard.getPlayer('right');
-        if (player !== null) {
-            player.increasePoints();
+    _createClass(Ball, [{
+        key: 'addToStage',
+        value: function addToStage(stage) {
+            stage.addChild(this.easel);
+            stage.update();
         }
-        return this.gameboard.resetBall(this);
-    }
-    if (this.x - width >= this.gameboard.getWidth() && this.collisionOffset > 50) {
-        this.running = false;
-        player = this.gameboard.getPlayer('left');
-        if (player !== null) {
-            player.increasePoints();
+    }, {
+        key: 'destroy',
+        value: function destroy() {
+            // remove from loop
         }
-        return this.gameboard.resetBall(this);
-    }
-    detectCollision.call(this, bars, this.gameboard.getPowerUp());
-};
+    }, {
+        key: 'render',
+        value: function render() {
+            if (!this.running) {
+                return;
+            }
+            var val = Math.PI / 180 * (this.angle - 90);
+            this.oldX = this.x;
+            this.oldY = this.y;
+            this.x = this.hozdirection ? this.oldX - this.velocity * Math.cos(val) : this.oldX + this.velocity * Math.cos(val);
+            this.y = this.vertdirection ? this.oldY - this.velocity * Math.sin(val) : this.oldY + this.velocity * Math.sin(val);
+            this.move();
+        }
+    }, {
+        key: 'hit',
+        value: function hit(bar, offset) {
+            this.collisionOffset = 0;
+            var diffFromTop = Math.max(0, offset);
+            var recalcToGameDimension = this.gameboard.getHeight() / this.gameboard.getCanvasHeight() * diffFromTop;
+            var angleOffset = Math.abs(recalcToGameDimension - bar.getHeight() / 2) / (bar.getHeight() / 2) * maxoffset;
+            if (!this.vertdirection && offset <= 15 || this.vertdirection && offset > 15) {
+                this.angle = Math.max(minangle, this.angle - angleOffset);
+            } else {
+                this.angle = Math.min(maxangle, this.angle + angleOffset);
+            }
+            this.hozdirection = !this.hozdirection;
+            this.velocity *= 1.05;
+        }
+    }, {
+        key: 'move',
+        value: function move() {
+            ++this.collisionOffset;
+            var bars = this.gameboard.getBars();
+            this.easel.x = this.gameboard.getCanvasWidth() * (this.x / this.gameboard.getWidth());
+            this.easel.y = this.gameboard.getCanvasHeight() * (this.y / this.gameboard.getHeight());
+            if (this.y - width <= 0 || this.y + width >= this.gameboard.getHeight()) {
+                this.vertdirection = !this.vertdirection;
+            }
+            var player = null;
+            if (this.x + width <= 0 && this.collisionOffset > 50) {
+                this.running = false;
+                player = this.gameboard.getPlayer('right');
+                if (player !== null) {
+                    player.increasePoints();
+                }
+                return this.gameboard.resetBall(this);
+            }
+            if (this.x - width >= this.gameboard.getWidth() && this.collisionOffset > 50) {
+                this.running = false;
+                player = this.gameboard.getPlayer('left');
+                if (player !== null) {
+                    player.increasePoints();
+                }
+                return this.gameboard.resetBall(this);
+            }
+            detectCollision.call(this, bars, this.gameboard.getPowerUp());
+        }
+    }]);
+
+    return Ball;
+}();
 
 function detectCollision(bars, powerups) {
     var ballwidth = this.gameboard.getCanvasWidth() * (width / this.gameboard.getWidth()),
@@ -23362,7 +23376,7 @@ function detectCollision(bars, powerups) {
                 var myBar = this.hozdirection ? bars[1] : bars[0];
                 var opponentsBar = this.hozdirection ? bars[0] : bars[1];
                 this.gameboard.getStage().removeChild(powerup.easel);
-                this.gameboard.removePowerup(powerup);
+                this.gameboard.removePowerUp(powerup);
                 powerup.hit(this.gameboard, myBar, opponentsBar, this);
                 break;
             }
@@ -23370,81 +23384,67 @@ function detectCollision(bars, powerups) {
     }, this);
 }
 
-function createBall(gameboard, x, y) {
-    var circle = new _createjsCollection2.default.createjs.Shape(),
-        ballwidth = gameboard.getCanvasWidth() * (width / gameboard.getWidth());
-    circle.graphics.beginFill("#00FF00").drawCircle(0, 0, ballwidth);
-    circle.x = gameboard.getCanvasWidth() * (x / gameboard.getWidth());
-    circle.y = gameboard.getCanvasHeight() * (y / gameboard.getHeight());
-    return circle;
-};
-
-function createUuid() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-        var r = Math.random() * 16 | 0,
-            v = c == 'x' ? r : r & 0x3 | 0x8;
-        return v.toString(16);
-    });
-};
-
 exports.default = Ball;
 
-},{"createjs-collection":1}],3:[function(require,module,exports){
+},{"./services/GraphicService":17,"./services/UuidService":18}],3:[function(require,module,exports){
 'use strict';
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _createjsCollection = require('createjs-collection');
+var _GraphicService = require('./services/GraphicService');
 
-var _createjsCollection2 = _interopRequireDefault(_createjsCollection);
+var _GraphicService2 = _interopRequireDefault(_GraphicService);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var height = 35;
 var width = 10;
 var tickOffset = 2.5;
+var color = "#00FF00";
 
 var keyState = {};
 
-var Bar = function Bar(y, orient, gameboard, keyprofile) {
-    this.gameboard = gameboard;
-    this.x = orient === 'left' ? width / 2 : this.gameboard.getWidth() - 1.5 * width;
-    this.y = y - height / 2;
-    this.easel = createBar(this.gameboard, this.x, this.y);
-    if (keyprofile) {
-        registerControls.call(this, keyprofile);
+var Bar = function () {
+    function Bar(y, orient, gameboard, keyprofile) {
+        _classCallCheck(this, Bar);
+
+        this.gameboard = gameboard;
+        this.x = orient === 'left' ? width / 2 : this.gameboard.getWidth() - 1.5 * width;
+        this.y = y - height / 2;
+        this.easel = _GraphicService2.default.Bar(gameboard.getCanvasWidth() * (this.x / this.gameboard.getWidth()), gameboard.getCanvasHeight() * (this.y / this.gameboard.getHeight()), gameboard.getCanvasWidth() * (width / this.gameboard.getWidth()), gameboard.getCanvasHeight() * (height / this.gameboard.getHeight()), color);
+        if (keyprofile) {
+            registerControls.call(this, keyprofile);
+        }
     }
-};
 
-Bar.prototype.addToStage = function (stage) {
-    stage.addChild(this.easel);
-    stage.update();
-};
+    _createClass(Bar, [{
+        key: 'addToStage',
+        value: function addToStage(stage) {
+            stage.addChild(this.easel);
+            stage.update();
+        }
+    }, {
+        key: 'getHeight',
+        value: function getHeight() {
+            return height * this.easel.scaleY;
+        }
+    }, {
+        key: 'getWidth',
+        value: function getWidth() {
+            return width * this.easel.scaleX;
+        }
+    }, {
+        key: 'setY',
+        value: function setY(y) {
+            this.y = Math.max(0, Math.min(this.gameboard.getHeight() - this.getHeight(), y));
+            this.easel.y = this.gameboard.getCanvasHeight() * (this.y / this.gameboard.getHeight());
+        }
+    }]);
 
-Bar.prototype.getHeight = function () {
-    return height * this.easel.scaleY;
-};
-
-Bar.prototype.getWidth = function () {
-    return width * this.easel.scaleX;
-};
-
-Bar.prototype.setY = function (y) {
-    this.y = Math.max(0, Math.min(this.gameboard.getHeight() - this.getHeight(), y));
-    this.easel.y = this.gameboard.getCanvasHeight() * (this.y / this.gameboard.getHeight());
-};
-
-function createBar(gameboard, x, y) {
-    var bar = new _createjsCollection2.default.createjs.Shape(),
-        barwidth = gameboard.getCanvasWidth() * (width / gameboard.getWidth()),
-        barheight = gameboard.getCanvasHeight() * (height / gameboard.getHeight());
-    bar.graphics.beginFill("#00FF00").drawRoundRect(0, 0, barwidth, barheight, 0);
-    bar.x = gameboard.getCanvasWidth() * (x / gameboard.getWidth());
-    bar.y = gameboard.getCanvasHeight() * (y / gameboard.getHeight());
-    return bar;
-};
+    return Bar;
+}();
 
 function registerControls(keyprofile) {
     document.onkeydown = function (e) {
@@ -23476,14 +23476,11 @@ function registerControls(keyprofile) {
     }.bind(this));
 };
 
-exports.default = Bar;
+module.exports = Bar;
 
-},{"createjs-collection":1}],4:[function(require,module,exports){
+},{"./services/GraphicService":17}],4:[function(require,module,exports){
 'use strict';
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
 var zero = {
     row1: {
         upper: true,
@@ -23617,7 +23614,7 @@ var digits = {
     9: nine
 };
 
-exports.default = {
+module.exports = {
     get: function get(digit) {
         return digits[digit] || null;
     }
@@ -23625,10 +23622,6 @@ exports.default = {
 
 },{}],5:[function(require,module,exports){
 'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
 
 var _Bar = require('./Bar');
 
@@ -23668,14 +23661,10 @@ Player.prototype.increasePoints = function () {
     this.result.setPoints(this.points);
 };
 
-exports.default = Player;
+module.exports = Player;
 
 },{"./Bar":3,"./Result.js":7}],6:[function(require,module,exports){
 'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
 
 var _powerups = require('./powerups');
 
@@ -23683,7 +23672,7 @@ var _powerups2 = _interopRequireDefault(_powerups);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-exports.default = {
+module.exports = {
     spawn: function spawn(gameboard) {
         var powerup = new _powerups2.default.AddBall(gameboard);
         powerup.spawn();
@@ -23693,10 +23682,6 @@ exports.default = {
 
 },{"./powerups":16}],7:[function(require,module,exports){
 'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
 
 var _Digits = require('./Digits.js');
 
@@ -23850,7 +23835,7 @@ function getDigitCount(points) {
     return points.toString().length;
 }
 
-exports.default = Result;
+module.exports = Result;
 
 },{"./Digits.js":4,"createjs-collection":1}],8:[function(require,module,exports){
 'use strict';
@@ -23870,10 +23855,6 @@ function init() {
 },{"./pong":12}],9:[function(require,module,exports){
 'use strict';
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
 var _leftkeyboard = require('./leftkeyboard');
 
 var _leftkeyboard2 = _interopRequireDefault(_leftkeyboard);
@@ -23884,7 +23865,7 @@ var _rightkeyboard2 = _interopRequireDefault(_rightkeyboard);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-exports.default = {
+module.exports = {
     left: _leftkeyboard2.default,
     right: _rightkeyboard2.default
 };
@@ -23892,10 +23873,7 @@ exports.default = {
 },{"./leftkeyboard":10,"./rightkeyboard":11}],10:[function(require,module,exports){
 "use strict";
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.default = {
+module.exports = {
     up: [87],
     down: [83]
 };
@@ -23903,10 +23881,7 @@ exports.default = {
 },{}],11:[function(require,module,exports){
 "use strict";
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.default = {
+module.exports = {
     up: [38],
     down: [40]
 };
@@ -23914,9 +23889,7 @@ exports.default = {
 },{}],12:[function(require,module,exports){
 'use strict';
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _Ball = require('./Ball');
 
@@ -23944,18 +23917,131 @@ var _createjsCollection2 = _interopRequireDefault(_createjsCollection);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 var height = 180;
 var width = 320;
 
 var resultoffset = 40;
 
 var callbacks = [];
-
 var stage = null;
 var balls = [];
 var bars = [];
 var players = {};
 var powerups = [];
+
+var Pong = function () {
+    function Pong() {
+        _classCallCheck(this, Pong);
+    }
+
+    _createClass(Pong, [{
+        key: 'start',
+        value: function start() {
+            document.getElementById('gameboard').appendChild(createCanvas());
+            stage = new _createjsCollection2.default.createjs.Stage('gameboardCanvas');
+            stage.canvas.width = 1280;
+            stage.canvas.height = 720;
+            this.addBall();
+            createPlayer.call(this, stage, 'left', _keyprofiles2.default.left);
+            createPlayer.call(this, stage, 'right', _keyprofiles2.default.right);
+            this.registerToLoop(spawnPowerUp.bind(this));
+            _createjsCollection2.default.createjs.Ticker.setFPS(60);
+            _createjsCollection2.default.createjs.Ticker.addEventListener('tick', function () {
+                stage.update();
+                for (var i = callbacks.length - 1; i >= 0; --i) {
+                    callbacks[i]();
+                }
+            });
+        }
+    }, {
+        key: 'addBall',
+        value: function addBall(velocity, hozdirection, vertdirection, angle, x, y) {
+            var ball = new _Ball2.default(this, velocity, hozdirection, vertdirection, angle, x, y);
+            ball.addToStage(stage);
+            balls.push(ball);
+        }
+    }, {
+        key: 'getBars',
+        value: function getBars() {
+            return bars;
+        }
+    }, {
+        key: 'getHeight',
+        value: function getHeight() {
+            return height;
+        }
+    }, {
+        key: 'getPlayer',
+        value: function getPlayer(orient) {
+            return players[orient] || null;
+        }
+    }, {
+        key: 'getPowerUp',
+        value: function getPowerUp() {
+            return powerups;
+        }
+    }, {
+        key: 'getStage',
+        value: function getStage() {
+            return stage;
+        }
+    }, {
+        key: 'getWidth',
+        value: function getWidth() {
+            return width;
+        }
+    }, {
+        key: 'getCanvasHeight',
+        value: function getCanvasHeight() {
+            return stage.canvas.clientHeight;
+        }
+    }, {
+        key: 'getCanvasWidth',
+        value: function getCanvasWidth() {
+            return stage.canvas.clientWidth;
+        }
+    }, {
+        key: 'registerToLoop',
+        value: function registerToLoop(func) {
+            if (typeof func === 'function') {
+                callbacks.push(func);
+            }
+        }
+    }, {
+        key: 'resetBall',
+        value: function resetBall(oldBall) {
+            var i;
+            oldBall.destroy();
+            stage.removeChild(oldBall);
+            for (i = 0; i < balls.length; ++i) {
+                if (oldBall.id === balls[i].id) {
+                    break;
+                }
+            }
+            if (i < balls.length) {
+                balls.splice(i, 1);
+                if (balls.length === 0) {
+                    this.addBall(null, !oldBall.hozdirection);
+                }
+            }
+        }
+    }, {
+        key: 'removePowerUp',
+        value: function removePowerUp(powerUp) {
+            var i, max;
+            for (i = 0, max = powerups.length; i < max; ++i) {
+                if (powerUp.id === powerups[i].id) {
+                    break;
+                }
+            }
+            powerups.splice(i, 1);
+        }
+    }]);
+
+    return Pong;
+}();
 
 var createCanvas = function createCanvas() {
     var canvas = document.createElement('canvas');
@@ -23965,88 +24051,15 @@ var createCanvas = function createCanvas() {
     return canvas;
 };
 
-var getHeight = function getHeight() {
-    return height;
-};
-
-var getStage = function getStage() {
-    return stage;
-};
-
-var getWidth = function getWidth() {
-    return width;
-};
-
-var getCanvasHeight = function getCanvasHeight() {
-    return stage.canvas.clientHeight;
-};
-
-var getCanvasWidth = function getCanvasWidth() {
-    return stage.canvas.clientWidth;
-};
-
 var spawnPowerUp = function spawnPowerUp() {
     if (powerups.length >= 1) {
         return;
     }
     var rand = Math.floor(Math.random() * 1000);
-    console.log(rand);
     if (rand === 666) {
         var powerup = _PowerUpHandler2.default.spawn(this);
         powerups.push(powerup);
     }
-};
-
-var removePowerup = function removePowerup(powerUp) {
-    var i, max;
-    for (i = 0, max = powerups.length; i < max; ++i) {
-        if (powerUp.id === powerups[i].id) {
-            break;
-        }
-    }
-    powerups.splice(i, 1);
-};
-
-var resetBall = function resetBall(oldBall) {
-    var i;
-    oldBall.destroy();
-    stage.removeChild(oldBall);
-    for (i = 0; i < balls.length; ++i) {
-        if (oldBall.id === balls[i].id) {
-            break;
-        }
-    }
-    if (i < balls.length) {
-        balls.splice(i, 1);
-        if (balls.length === 0) {
-            addBall.call(this, null, !oldBall.hozdirection);
-        }
-    }
-};
-
-var addBall = function addBall(velocity, hozdirection, vertdirection, angle, x, y) {
-    var ball = new _Ball2.default(this, velocity, hozdirection, vertdirection, angle, x, y);
-    ball.addToStage(stage);
-    balls.push(ball);
-};
-
-var start = function start() {
-    var i = 0;
-    document.getElementById('gameboard').appendChild(createCanvas());
-    stage = new _createjsCollection2.default.createjs.Stage('gameboardCanvas');
-    stage.canvas.width = 1280;
-    stage.canvas.height = 720;
-    addBall.call(this);
-    createPlayer.call(this, stage, 'left', _keyprofiles2.default.left);
-    createPlayer.call(this, stage, 'right', _keyprofiles2.default.right);
-    registerToLoop(spawnPowerUp.bind(this));
-    _createjsCollection2.default.createjs.Ticker.setFPS(60);
-    _createjsCollection2.default.createjs.Ticker.addEventListener('tick', function () {
-        stage.update();
-        for (i = callbacks.length - 1; i >= 0; --i) {
-            callbacks[i]();
-        }
-    });
 };
 
 function createPlayer(stage, orient, controllable) {
@@ -24067,163 +24080,161 @@ function createPlayer(stage, orient, controllable) {
     player.createResult(this, stage, x, yOffset);
     bars.push(player.createBar(height / 2, this, stage));
     players[orient] = player;
-};
+}
 
-var registerToLoop = function registerToLoop(func) {
-    if (typeof func === 'function') {
-        callbacks.push(func);
-    }
-};
-
-exports.default = {
-    addBall: addBall,
-    start: start,
-    getBars: function getBars() {
-        return bars;
-    },
-    getPlayer: function getPlayer(orient) {
-        return players[orient] || null;
-    },
-    getHeight: getHeight,
-    getPowerUp: function getPowerUp() {
-        return powerups;
-    },
-    getStage: getStage,
-    getWidth: getWidth,
-    getCanvasHeight: getCanvasHeight,
-    getCanvasWidth: getCanvasWidth,
-    registerToLoop: registerToLoop,
-    removePowerup: removePowerup,
-    resetBall: resetBall
-};
+module.exports = new Pong();
 
 },{"./Ball":2,"./Player":5,"./PowerUpHandler":6,"./Result":7,"./keyprofiles":9,"createjs-collection":1}],13:[function(require,module,exports){
 'use strict';
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _createjsCollection = require('createjs-collection');
+var _UuidService = require('../services/UuidService');
 
-var _createjsCollection2 = _interopRequireDefault(_createjsCollection);
+var _UuidService2 = _interopRequireDefault(_UuidService);
+
+var _GraphicService = require('../services/GraphicService');
+
+var _GraphicService2 = _interopRequireDefault(_GraphicService);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var width = 5;
 var maxOffsetFromCenter = 80;
 var color = '#FFFFFF';
 
-var PowerUp = function PowerUp(gameboard) {
-    this.id = createUuid();
-    this.gameboard = gameboard;
-    this.effectSecondsToLast = 10;
-    this.color = color;
-    this.easel = null;
-};
+var PowerUp = function () {
+    function PowerUp(gameboard) {
+        _classCallCheck(this, PowerUp);
 
-PowerUp.prototype.spawn = function () {
-    var x = Math.floor(Math.random() * (this.gameboard.getCanvasWidth() * maxOffsetFromCenter / this.gameboard.getWidth())),
-        y = Math.floor(Math.random() * (this.gameboard.getCanvasHeight() * maxOffsetFromCenter / this.gameboard.getHeight()));
-    if (Math.random() <= .5) {
-        x *= -1;
+        this.id = _UuidService2.default.getUuid();
+        this.gameboard = gameboard;
+        this.effectSecondsToLast = 10;
+        this.color = color;
+        this.easel = null;
     }
-    if (Math.random() <= .5) {
-        y *= -1;
-    }
-    this.easel = createCircle.call(this, this.gameboard, x, y);
-    this.gameboard.getStage().addChild(this.easel);
-};
 
-//myBar refers to the bar that hits the ball the last time
-PowerUp.prototype.hit = function (gameboard, myBar, opponentsBar, ball) {
-    console.warn('you need to implement this yourself!');
-};
+    _createClass(PowerUp, [{
+        key: 'spawn',
+        value: function spawn() {
+            var x = Math.floor(Math.random() * (this.gameboard.getCanvasWidth() * maxOffsetFromCenter / this.gameboard.getWidth())),
+                y = Math.floor(Math.random() * (this.gameboard.getCanvasHeight() * maxOffsetFromCenter / this.gameboard.getHeight()));
+            if (Math.random() <= .5) {
+                x *= -1;
+            }
+            if (Math.random() <= .5) {
+                y *= -1;
+            }
+            var ballWidth = this.gameboard.getCanvasWidth() * (width / this.gameboard.getWidth());
+            this.easel = _GraphicService2.default.Circle(this.gameboard.getCanvasWidth() / 2 + x, this.gameboard.getCanvasHeight() / 2 + y, ballWidth, this.color);
+            this.gameboard.getStage().addChild(this.easel);
+        }
+    }, {
+        key: 'hit',
+        value: function hit(gameboard, myBar, opponentsBar, ball) {
+            //myBar refers to the bar that hits the ball the last time
+            console.warn('you need to implement this yourself!');
+        }
+    }]);
 
-function createCircle(gameboard, x, y) {
-    var circle = new _createjsCollection2.default.createjs.Shape(),
-        ballwidth = gameboard.getCanvasWidth() * (width / gameboard.getWidth());
-    circle.graphics.beginFill(this.color).drawCircle(0, 0, ballwidth);
-    circle.x = gameboard.getCanvasWidth() / 2 + x;
-    circle.y = gameboard.getCanvasHeight() / 2 + y;
-    return circle;
-};
+    return PowerUp;
+}();
 
-function createUuid() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-        var r = Math.random() * 16 | 0,
-            v = c == 'x' ? r : r & 0x3 | 0x8;
-        return v.toString(16);
-    });
-};
+module.exports = PowerUp;
 
-exports.default = PowerUp;
-
-},{"createjs-collection":1}],14:[function(require,module,exports){
+},{"../services/GraphicService":17,"../services/UuidService":18}],14:[function(require,module,exports){
 'use strict';
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _AbstractPowerUp = require('./AbstractPowerUp');
+var _AbstractPowerUp2 = require('./AbstractPowerUp');
 
-var _AbstractPowerUp2 = _interopRequireDefault(_AbstractPowerUp);
+var _AbstractPowerUp3 = _interopRequireDefault(_AbstractPowerUp2);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
 var color = 'rgba(77,144,144, .7)';
 
-var AddBall = function AddBall() {
-    PowerUp.apply(this, arguments);
-    this.color = color;
-};
+var AddBallPowerUp = function (_AbstractPowerUp) {
+    _inherits(AddBallPowerUp, _AbstractPowerUp);
 
-AddBall.prototype = new _AbstractPowerUp2.default();
+    function AddBallPowerUp(gameboard) {
+        _classCallCheck(this, AddBallPowerUp);
 
-AddBall.prototype.hit = function (gameboard, myBar, opponentsBar, ball) {
-    gameboard.addBall(ball.velocity / 2, ball.hozdirection, !ball.vertdirection, null, ball.x, ball.y);
-};
+        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(AddBallPowerUp).call(this, gameboard));
 
-exports.default = AddBall;
+        _this.color = color;
+        return _this;
+    }
+
+    _createClass(AddBallPowerUp, [{
+        key: 'hit',
+        value: function hit(gameboard, myBar, opponentsBar, ball) {
+            gameboard.addBall(ball.velocity / 2, ball.hozdirection, !ball.vertdirection, null, ball.x, ball.y);
+        }
+    }]);
+
+    return AddBallPowerUp;
+}(_AbstractPowerUp3.default);
+
+module.exports = AddBallPowerUp;
 
 },{"./AbstractPowerUp":13}],15:[function(require,module,exports){
 'use strict';
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _AbstractPowerUp = require('./AbstractPowerUp');
+var _AbstractPowerUp2 = require('./AbstractPowerUp');
 
-var _AbstractPowerUp2 = _interopRequireDefault(_AbstractPowerUp);
+var _AbstractPowerUp3 = _interopRequireDefault(_AbstractPowerUp2);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var color = 'rgba(144,144,77, .7)';
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var ReduceBarHeight = function ReduceBarHeight() {
-    PowerUp.apply(this, arguments);
-    this.color = color;
-};
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-ReduceBarHeight.prototype = new _AbstractPowerUp2.default();
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-ReduceBarHeight.prototype.hit = function (gameboard, myBar, opponentsBar, ball) {
-    opponentsBar.easel.scaleY = .6;
-    setTimeout(function () {
-        opponentsBar.easel.scaleY = 1;
-    }, this.effectSecondsToLast * 1000);
-};
+var color = 'rgba(77,144,144, .7)';
 
-exports.default = ReduceBarHeight;
+var AddBallPowerUp = function (_AbstractPowerUp) {
+    _inherits(AddBallPowerUp, _AbstractPowerUp);
+
+    function AddBallPowerUp(gameboard) {
+        _classCallCheck(this, AddBallPowerUp);
+
+        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(AddBallPowerUp).call(this, gameboard));
+
+        _this.color = color;
+        return _this;
+    }
+
+    _createClass(AddBallPowerUp, [{
+        key: 'hit',
+        value: function hit(gameboard, myBar, opponentsBar, ball) {
+            opponentsBar.easel.scaleY = .6;
+            setTimeout(function () {
+                opponentsBar.easel.scaleY = 1;
+            }, this.effectSecondsToLast * 1000);
+        }
+    }]);
+
+    return AddBallPowerUp;
+}(_AbstractPowerUp3.default);
+
+module.exports = AddBallPowerUp;
 
 },{"./AbstractPowerUp":13}],16:[function(require,module,exports){
 'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
 
 var _AddBall = require('./AddBall');
 
@@ -24235,9 +24246,54 @@ var _ReduceBarHeight2 = _interopRequireDefault(_ReduceBarHeight);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-exports.default = {
+module.exports = {
     AddBall: _AddBall2.default,
     ReduceBarHeight: _ReduceBarHeight2.default
 };
 
-},{"./AddBall":14,"./ReduceBarHeight":15}]},{},[8]);
+},{"./AddBall":14,"./ReduceBarHeight":15}],17:[function(require,module,exports){
+'use strict';
+
+var _createjsCollection = require('createjs-collection');
+
+var _createjsCollection2 = _interopRequireDefault(_createjsCollection);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var circle = function circle(x, y, width, color) {
+    var circle = new _createjsCollection2.default.createjs.Shape();
+    circle.graphics.beginFill(color).drawCircle(0, 0, width);
+    circle.x = x;
+    circle.y = y;
+    return circle;
+};
+
+var bar = function bar(x, y, width, height, color) {
+    var bar = new _createjsCollection2.default.createjs.Shape();
+    bar.graphics.beginFill(color).drawRoundRect(0, 0, width, height, 0);
+    bar.x = x;
+    bar.y = y;
+    return bar;
+};
+
+module.exports = {
+    Bar: bar,
+    Circle: circle
+};
+
+},{"createjs-collection":1}],18:[function(require,module,exports){
+'use strict';
+
+var getUuid = function getUuid() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0,
+            v = c == 'x' ? r : r & 0x3 | 0x8;
+        return v.toString(16);
+    });
+};
+
+module.exports = {
+    getUuid: getUuid
+};
+
+},{}]},{},[8]);

@@ -29,4 +29,4 @@ Player.prototype.increasePoints = function () {
     this.result.setPoints(this.points);
 };
 
-export default Player;
+module.exports = Player;

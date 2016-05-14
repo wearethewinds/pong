@@ -1,7 +1,7 @@
 import leftkeyboard from './leftkeyboard';
 import rightkeyboard from './rightkeyboard';
 
-export default {
+module.exports = {
     left: leftkeyboard,
     right: rightkeyboard
 };

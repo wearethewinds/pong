@@ -1,6 +1,6 @@
 import PowerUps from './powerups';
 
-export default {
+module.exports =  {
     spawn: function (gameboard) {
         var powerup = new PowerUps.AddBall(gameboard);
         powerup.spawn();

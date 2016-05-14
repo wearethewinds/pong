@@ -1,49 +1,49 @@
-import createjs from 'createjs-collection';
+import GraphicService from './services/GraphicService';
 
 const height = 35;
 const width = 10;
 const tickOffset = 2.5;
+const color = "#00FF00";
 
 var keyState = {};
 
-var Bar = function (y, orient, gameboard, keyprofile) {
-    this.gameboard = gameboard;
-    this.x = (orient === 'left') ? width / 2 : this.gameboard.getWidth() - 1.5 * width;
-    this.y = y - height / 2;
-    this.easel = createBar(this.gameboard, this.x, this.y);
-    if (keyprofile) {
-        registerControls.call(this, keyprofile);
+class Bar {
+    
+    constructor (y, orient, gameboard, keyprofile) {
+        this.gameboard = gameboard;
+        this.x = (orient === 'left') ? width / 2 : this.gameboard.getWidth() - 1.5 * width;
+        this.y = y - height / 2;
+        this.easel = GraphicService.Bar(
+            gameboard.getCanvasWidth() * (this.x / this.gameboard.getWidth()),
+            gameboard.getCanvasHeight() * (this.y / this.gameboard.getHeight()),
+            gameboard.getCanvasWidth() * (width / this.gameboard.getWidth()),
+            gameboard.getCanvasHeight() * (height / this.gameboard.getHeight()),
+            color
+        );
+        if (keyprofile) {
+            registerControls.call(this, keyprofile);
+        } 
     }
-};
-
-Bar.prototype.addToStage = function (stage) {
-    stage.addChild(this.easel);
-    stage.update();
-};
-
-Bar.prototype.getHeight = function () {
-    return height * this.easel.scaleY;
-};
-
-Bar.prototype.getWidth = function () {
-    return width * this.easel.scaleX;
-};
-
-Bar.prototype.setY = function (y) {
-    this.y = Math.max(0, Math.min(this.gameboard.getHeight() - this.getHeight(), y));
-    this.easel.y = this.gameboard.getCanvasHeight() * (this.y / this.gameboard.getHeight());
-};
-
-function createBar(gameboard, x, y) {
-    var bar = new createjs.createjs.Shape(),
-        barwidth = gameboard.getCanvasWidth() * (width / gameboard.getWidth()),
-        barheight = gameboard.getCanvasHeight() * (height / gameboard.getHeight());
-    bar.graphics.beginFill("#00FF00").drawRoundRect(0, 0, barwidth, barheight, 0);
-    bar.x = gameboard.getCanvasWidth() * (x / gameboard.getWidth());
-    bar.y = gameboard.getCanvasHeight() * (y / gameboard.getHeight());
-    return bar;
-};
-
+    
+    addToStage (stage) {
+        stage.addChild(this.easel);
+        stage.update();
+    }
+    
+    getHeight () {
+        return height * this.easel.scaleY
+    }
+    
+    getWidth () {
+        return width * this.easel.scaleX;
+    }
+    
+    setY (y) {
+        this.y = Math.max(0, Math.min(this.gameboard.getHeight() - this.getHeight(), y));
+        this.easel.y = this.gameboard.getCanvasHeight() * (this.y / this.gameboard.getHeight());
+    }
+    
+}
 
 function registerControls(keyprofile) {
     document.onkeydown = function (e) {
@@ -75,4 +75,4 @@ function registerControls(keyprofile) {
     }.bind(this));
 };
 
-export default Bar;
+module.exports = Bar;

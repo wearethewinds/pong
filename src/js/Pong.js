@@ -10,13 +10,110 @@ const width = 320;
 
 const resultoffset = 40;
 
-var callbacks = [];
+let callbacks = [];
+let stage = null;
+let balls = [];
+let bars = [];
+let players = {};
+let powerups = [];
 
-var stage = null;
-var balls = [];
-var bars = [];
-var players = {};
-var powerups = [];
+class Pong {
+
+
+    constructor() {
+
+    }
+
+    start () {
+        document.getElementById('gameboard').appendChild(createCanvas());
+        stage = new createjs.createjs.Stage('gameboardCanvas');
+        stage.canvas.width = 1280;
+        stage.canvas.height = 720;
+        this.addBall();
+        createPlayer.call(this, stage, 'left', Keyprofiles.left);
+        createPlayer.call(this, stage, 'right', Keyprofiles.right);
+        this.registerToLoop(spawnPowerUp.bind(this));
+        createjs.createjs.Ticker.setFPS(60);
+        createjs.createjs.Ticker.addEventListener('tick', function () {
+            stage.update();
+            for (let i = callbacks.length - 1; i >= 0; --i) {
+                callbacks[i]();
+            }
+        });
+    }
+
+    addBall (velocity, hozdirection, vertdirection, angle, x, y) {
+        var ball = new Ball(this, velocity, hozdirection, vertdirection, angle, x, y);
+        ball.addToStage(stage);
+        balls.push(ball);
+    }
+
+    getBars () {
+        return bars;
+    }
+
+    getHeight () {
+        return height;
+    };
+
+    getPlayer (orient) {
+        return players[orient] || null;
+    }
+
+    getPowerUp () {
+        return powerups;
+    }
+
+    getStage () {
+        return stage;
+    }
+
+    getWidth () {
+        return width;
+    };
+
+    getCanvasHeight () {
+        return stage.canvas.clientHeight;
+    };
+
+    getCanvasWidth () {
+        return stage.canvas.clientWidth;
+    };
+
+    registerToLoop (func) {
+        if (typeof func === 'function') {
+            callbacks.push(func);
+        }
+    };
+
+    resetBall (oldBall) {
+        var i;
+        oldBall.destroy();
+        stage.removeChild(oldBall);
+        for (i = 0; i < balls.length; ++i) {
+            if (oldBall.id === balls[i].id) {
+                break;
+            }
+        }
+        if (i < balls.length) {
+            balls.splice(i, 1);
+            if (balls.length === 0) {
+                this.addBall(null, !oldBall.hozdirection);
+            }
+
+        }
+    }
+
+    removePowerUp (powerUp) {
+        var i, max;
+        for (i = 0, max = powerups.length; i < max; ++i) {
+            if (powerUp.id === powerups[i].id) {
+                break;
+            }
+        }
+        powerups.splice(i, 1);
+    }
+}
 
 var createCanvas = function () {
     var canvas = document.createElement('canvas');
@@ -26,90 +123,16 @@ var createCanvas = function () {
     return canvas;
 };
 
-var getHeight = function () {
-    return height;
-};
-
-var getStage = function () {
-    return stage;
-}
-
-var getWidth = function () {
-    return width;
-};
-
-var getCanvasHeight = function () {
-    return stage.canvas.clientHeight;
-};
-
-var getCanvasWidth = function () {
-    return stage.canvas.clientWidth;
-};
-
 var spawnPowerUp = function () {
     if (powerups.length >= 1) {
         return;
     }
     var rand = Math.floor(Math.random() * 1000);
-    console.log(rand);
     if (rand === 666) {
         var powerup = PowerUpHandler.spawn(this);
         powerups.push(powerup);
     }
 
-};
-
-var removePowerup = function (powerUp) {
-    var i, max;
-    for (i = 0, max = powerups.length; i < max; ++i) {
-        if (powerUp.id === powerups[i].id) {
-            break;
-        }
-    }
-    powerups.splice(i, 1);
-};
-
-var resetBall = function (oldBall) {
-    var i;
-    oldBall.destroy();
-    stage.removeChild(oldBall);
-    for (i = 0; i < balls.length; ++i) {
-        if (oldBall.id === balls[i].id) {
-            break;
-        }
-    }
-    if (i < balls.length) {
-        balls.splice(i, 1);
-        if (balls.length === 0) {
-            addBall.call(this, null, !oldBall.hozdirection);
-        }
-
-    }
-};
-
-var addBall = function (velocity, hozdirection, vertdirection, angle, x, y) {
-    var ball = new Ball(this, velocity, hozdirection, vertdirection, angle, x, y);
-    ball.addToStage(stage);
-    balls.push(ball);
-}
-
-var start = function () {
-    var i = 0;
-    document.getElementById('gameboard').appendChild(createCanvas());
-    stage = new createjs.createjs.Stage('gameboardCanvas');
-    stage.canvas.width = 1280;
-    stage.canvas.height = 720;
-    addBall.call(this);
-    createPlayer.call(this, stage, 'left', Keyprofiles.left);
-    createPlayer.call(this, stage, 'right', Keyprofiles.right);
-    registerToLoop(spawnPowerUp.bind(this));
-    createjs.createjs.Ticker.setFPS(60);
-    createjs.createjs.Ticker.addEventListener('tick', function () {
-        stage.update();
-        for (i = callbacks.length - 1; i >= 0; --i) {
-            callbacks[i]();
-        }
-    });
 };
 
 function createPlayer(stage, orient, controllable) {
@@ -130,32 +153,6 @@ function createPlayer(stage, orient, controllable) {
     player.createResult(this, stage, x, yOffset);
     bars.push(player.createBar(height / 2, this, stage));
     players[orient] = player;
-};
+}
 
-var registerToLoop = function (func) {
-    if (typeof func === 'function') {
-        callbacks.push(func);
-    }
-};
-
-export default {
-    addBall: addBall,
-    start: start,
-    getBars: function () {
-        return bars;
-    },
-    getPlayer: function (orient) {
-        return players[orient] || null;
-    },
-    getHeight: getHeight,
-    getPowerUp: function () {
-        return powerups;
-    },
-    getStage: getStage,
-    getWidth: getWidth,
-    getCanvasHeight: getCanvasHeight,
-    getCanvasWidth: getCanvasWidth,
-    registerToLoop: registerToLoop,
-    removePowerup: removePowerup,
-    resetBall: resetBall
-};
+module.exports = new Pong();

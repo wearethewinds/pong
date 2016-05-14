@@ -1,7 +1,7 @@
 import AddBall from './AddBall';
 import ReduceBarHeight from './ReduceBarHeight';
 
-export default {
+module.exports = {
     AddBall: AddBall,
     ReduceBarHeight: ReduceBarHeight
 };

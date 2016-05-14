@@ -144,4 +144,4 @@ function getDigitCount(points) {
 }
 
 
-export default Result;
+module.exports =  Result;

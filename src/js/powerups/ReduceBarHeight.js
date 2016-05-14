@@ -1,19 +1,21 @@
 import AbstractPowerUp from './AbstractPowerUp';
 
-const color = 'rgba(144,144,77, .7)';
+const color = 'rgba(77,144,144, .7)';
 
-var ReduceBarHeight = function () {
-    PowerUp.apply(this, arguments);
-    this.color = color;
-};
+class AddBallPowerUp extends AbstractPowerUp {
 
-ReduceBarHeight.prototype = new AbstractPowerUp();
+    constructor(gameboard) {
+        super(gameboard);
+        this.color = color;
+    }
 
-ReduceBarHeight.prototype.hit = function (gameboard, myBar, opponentsBar, ball) {
-    opponentsBar.easel.scaleY = .6;
-    setTimeout(function () {
-        opponentsBar.easel.scaleY = 1;
-    }, this.effectSecondsToLast * 1000);
-};
+    hit (gameboard, myBar, opponentsBar, ball) {
+        opponentsBar.easel.scaleY = .6;
+        setTimeout(function () {
+            opponentsBar.easel.scaleY = 1;
+        }, this.effectSecondsToLast * 1000);
+    }
 
-export default ReduceBarHeight;
+}
+
+module.exports = AddBallPowerUp;
