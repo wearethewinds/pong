@@ -7,18 +7,28 @@ const minangle = 30;
 const maxoffset = 25;
 const color = "#00FF00";
 
+let getHitBox = (gameboard) => {
+    let radius = gameboard.getCanvasWidth() * (width / gameboard.getWidth());
+    let angles = [];
+    for (let i = 0; i < 360; i += 22.5) {
+        angles.push(i);
+    }
+    return angles.map((angle) => {
+            return [Math.cos(angle) * radius, Math.sin(angle) * radius];
+        });
+};
+
 class Ball {
 
     constructor(gameboard, velocity, hozdirection, vertdirection, angle, x, y) {
         this.gameboard = gameboard;
+        this.hitBox = getHitBox(gameboard);
         this.id = UuidService.getUuid;
         this.x = x || (this.gameboard.getWidth() / 2) - (width / 2);
         this.y = y || (this.gameboard.getHeight() / 2) - (width / 2);
-        this.oldX = null;
-        this.oldY = null;
         this.easel = GraphicService.Circle(
-            this.gameboard.getCanvasWidth() * (x / this.gameboard.getWidth()),
-            this.gameboard.getCanvasHeight() * (y / this.gameboard.getHeight()),
+            this.gameboard.getCanvasWidth() * (this.x / this.gameboard.getWidth()),
+            this.gameboard.getCanvasHeight() * (this.y / this.gameboard.getHeight()),
             this.gameboard.getCanvasWidth() * (width / this.gameboard.getWidth()),
             color
         );
@@ -47,10 +57,8 @@ class Ball {
             return;
         }
         var val = (Math.PI / 180) * (this.angle - 90);
-        this.oldX = this.x;
-        this.oldY = this.y;
-        this.x = this.hozdirection ? this.oldX - (this.velocity * Math.cos(val)) : this.oldX + (this.velocity * Math.cos(val));
-        this.y = this.vertdirection ? this.oldY - (this.velocity * Math.sin(val)) : this.oldY + (this.velocity * Math.sin(val));
+        this.x = this.hozdirection ? this.x - (this.velocity * Math.cos(val)) : this.x + (this.velocity * Math.cos(val));
+        this.y = this.vertdirection ? this.y - (this.velocity * Math.sin(val)) : this.y + (this.velocity * Math.sin(val));
         this.move();
     }
 
@@ -100,50 +108,32 @@ class Ball {
 function detectCollision(bars, powerups) {
     var ballwidth = this.gameboard.getCanvasWidth() * (width / this.gameboard.getWidth()),
         pt = null,
-        checkPoints,
         bar = null;
     if (this.hozdirection) {
         bar = bars[0];
-        checkPoints = [
-            [-ballwidth, 0],
-            [0, -ballwidth],
-            [0, ballwidth],
-            [-ballwidth / 2, ballwidth / 2],
-            [-ballwidth / 2, -(ballwidth / 2)]
-        ];
     } else {
         bar = bars[1];
-        checkPoints = [
-            [ballwidth, 0],
-            [0, -ballwidth],
-            [0, ballwidth],
-            [ballwidth / 2, ballwidth / 2],
-            [ballwidth / 2, -(ballwidth / 2)]
-        ];
     }
-    checkPoints.forEach(function (checkPoint) {
+    for (let i = 0, max = this.hitBox.length; i < max; ++i) {
+        let hit = false,
+            checkPoint = this.hitBox[i];
         checkPoint.push(bar.easel);
         pt = this.easel.localToLocal.apply(this.easel, checkPoint);
         if (checkPoint[2].hitTest(pt.x, pt.y)) {
             this.hit(bar, pt.y);
+            hit = true;
         }
-    }, this);
-
-    checkPoints = [
-        [ballwidth, 0],
-        [0, -ballwidth],
-        [0, ballwidth],
-        [ballwidth / 2, ballwidth / 2],
-        [ballwidth / 2, -(ballwidth / 2)],
-        [-ballwidth, 0],
-        [-ballwidth / 2, ballwidth / 2],
-        [-ballwidth / 2, -(ballwidth / 2)]
-    ];
+        checkPoint.pop();
+        if (hit) {
+            return;
+        }
+    }
 
     powerups.forEach(function (powerup) {
         var i, max, checkPoint;
-        for (i = 0, max = checkPoints.length; i < max; ++i) {
-            checkPoint = checkPoints[i];
+        for (i = 0, max = this.hitBox.length; i < max; ++i) {
+            let hit = false;
+            checkPoint = this.hitBox[i];
             checkPoint.push(powerup.easel);
             pt = this.easel.localToLocal.apply(this.easel, checkPoint);
             if (checkPoint[2].hitTest(pt.x, pt.y)) {
@@ -152,7 +142,11 @@ function detectCollision(bars, powerups) {
                 this.gameboard.getStage().removeChild(powerup.easel);
                 this.gameboard.removePowerUp(powerup);
                 powerup.hit(this.gameboard, myBar, opponentsBar, this);
-                break;
+                hit = true;
+            }
+            checkPoint.pop();
+            if (hit) {
+                return true;
             }
         }
     }, this);
