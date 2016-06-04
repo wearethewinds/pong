@@ -8,9 +8,10 @@ const color = "#00FF00";
 var keyState = {};
 
 class Bar {
-    
+
     constructor (y, orient, gameboard, keyprofile) {
         this.gameboard = gameboard;
+        this.tickOffset = tickOffset;
         this.x = (orient === 'left') ? width / 2 : this.gameboard.getWidth() - 1.5 * width;
         this.y = y - height / 2;
         this.easel = GraphicService.Bar(
@@ -22,27 +23,27 @@ class Bar {
         );
         if (keyprofile) {
             registerControls.call(this, keyprofile);
-        } 
+        }
     }
-    
+
     addToStage (stage) {
         stage.addChild(this.easel);
         stage.update();
     }
-    
+
     getHeight () {
         return height * this.easel.scaleY
     }
-    
+
     getWidth () {
         return width * this.easel.scaleX;
     }
-    
+
     setY (y) {
         this.y = Math.max(0, Math.min(this.gameboard.getHeight() - this.getHeight(), y));
         this.easel.y = this.gameboard.getCanvasHeight() * (this.y / this.gameboard.getHeight());
     }
-    
+
 }
 
 function registerControls(keyprofile) {
@@ -59,13 +60,13 @@ function registerControls(keyprofile) {
         ;
         for (i = 0, max = keyprofile.up.length; i < max; ++i) {
             if (keyState[keyprofile.up[i]]) {
-                offset = -tickOffset;
+                offset = -this.tickOffset;
                 break;
             }
         }
         for (i = 0, max = keyprofile.down.length; i < max; ++i) {
             if (keyState[keyprofile.down[i]]) {
-                offset = tickOffset;
+                offset = this.tickOffset;
                 break;
             }
         }
